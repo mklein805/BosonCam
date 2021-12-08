@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-
+'''
+BosonCam 
+Version 1
+12/7/2021
+Created by Marissa Klein, Wellesley College 2022
+Intended use is controlling a FLIR Boson 640 and a thermal calibrator to test the infrared camera for BeaverCube2
+'''
 from flirpy.camera.boson import Boson
 import time
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 from playsound import playsound
+import serial as s
+import pandas as pd
 
 class BosonCam:
     #Time values in seconds
@@ -18,6 +26,7 @@ class BosonCam:
     def __init__(self):
         pass
     
+    #Basic Image Capture
     def image_capture(self):
         '''
         Captures an image using a connected FLIR Boson camera. 
@@ -38,7 +47,7 @@ class BosonCam:
         camera.close()
         return image
 
-#Focal Temp Function
+    #Focal Temp Function
     def focal_temp_capture(self):
         '''
         Captures the focal plane temperature of a connected
@@ -60,7 +69,8 @@ class BosonCam:
         camera.close()
         return focal_temp
     
-    def interval_capture(self, totalTime=120 , intervalTime=30 , workDir=os.getcwd() ):
+    #Interval Image Capture and Serial Line Capture
+    def interval_capture(self, totalTime=120 , intervalTime=30 , workDir=os.getcwd(), serPort=""):
         
         '''
         Captures images from a FLIR Boson camera at a specified time interval for a specified amount of time.
@@ -70,6 +80,7 @@ class BosonCam:
             totalTime (int) must be within 60 and 7200 seconds.
             intervalTime (int) must be within 5 and 600 seconds.
             workDir (str) must be a valid, working directory.
+            serPort (str) is the serial port.
             
         Default args:
             Runs for 120 seconds, taking images at 30 second intervals. Working directory is current directory.
@@ -84,6 +95,7 @@ class BosonCam:
         self.totalTime = totalTime
         self.intervalTime = intervalTime
         self.workDir = workDir
+        self.serPort = serPort
         t = 0
         start=time.time()
         
@@ -107,9 +119,17 @@ class BosonCam:
         month, year, day, hour, minute = today.tm_mon, today.tm_year, today.tm_mday, today.tm_hour, today.tm_min
         path = workDir + '\\' + str(month) + '_' + str(day) + '_' + str(year) + '_'+ str(hour) + '_' + str(minute) + '\\'
         os.mkdir(path)
+        
+        #Important Instantiations
+        elapsed_time =[]
+        target_tempr = []
+        it_num = []
+        central_tempr = []
+        back_tempr = []
+        ring_tempr = []
         t_val = []
         tempr_val = []
-        np.set_printoptions(suppress=True) 
+        np.set_printoptions(suppress = True) 
         
         
         while(True):
@@ -131,7 +151,32 @@ class BosonCam:
             tempr = self.focal_temp_capture()
             t_val.append(t)
             tempr_val.append(tempr)
-                        
+            
+            
+            #Capture the Serial port
+            ser = s.Serial(serPort,19200)
+            buffer = ser.readline()
+            real_line = ser.readline()
+            ser.close()
+            
+            #Values
+            el_t = real_line[0:8] #Time Elapsed
+            elapsed_time.append(el_t)
+            
+            tar_t = real_line[24:28] #Target Temp
+            target_tempr.append(tar_t)
+            
+            itn = real_line[34:38] #Iteration Number
+            it_num.append(itn)
+            
+            cen_t = real_line[39:45] #Central Target Temp
+            central_tempr.append(cen_t)
+            
+            b_t = real_line[62:68] #Back Heatsink Temp
+            back_tempr.append(b_t)
+            
+            ring_t = real_line[75:81] #Ring Temp
+            ring_tempr.append(ring_t)
             
             #Creating the interval capture and break statement
             t += intervalTime
@@ -139,10 +184,28 @@ class BosonCam:
                 break
             time.sleep(intervalTime)
         
+        #Focal Plane Temperature Reading
         t_v_tempr=np.array([t_val, tempr_val])
-        fileName = "Time_Vs_Temperature.txt"
+        fileName = "Time_Vs_FocalTemp.txt"
         savePath = path + "\\" + fileName
         np.savetxt(savePath, t_v_tempr, delimiter = ',', fmt='%f')
+        
+        #Serial Port Readings
+        data = {"Elapsed Time" : elapsed_time,
+                "Recorded T_Val" : t_val,
+                "Set Target Temperature" : target_tempr,
+                "Number of iterations" : it_num,
+                "Central Target Temperature" : central_tempr,
+                "Back Heatsink Temperature" : back_tempr,
+                "Ring Temperature" : ring_tempr}
+        
+        df = pd.DataFrame(data)
+        fileNameCSV = str(month) + "_" + str(day) + "_Serial_Data.csv"
+        savePathcsv = path + "\\" + fileNameCSV
+        print(savePathcsv)
+        df.to_csv(savePathcsv)
+        
+        #End Values and Sign Off
         end = time.time()
         imageNum = os.listdir(path)
         imageNum = len(imageNum)

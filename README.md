@@ -43,27 +43,35 @@ Tutorial:
 The function intended for main use is interval_capture. The other two functions can be called but are primarily created for use within interval_capture.
 
 Example one: Default
+
 cam = BosonCam()
+
 cam.interval_capture(serPort = "COM6")
 
 This captures images for 120 seconds at 30 second intervals. These values are the default settings. The working directory is whatever the current directory is.
 The serial port must always be specified, as there is no default value.
 
 Example two:
+
 cam = BosonCam()
+
 cam.interval_capture(300,30,'C:\ThisLab\WorkingDir',serPort='COM6')
 
 This captures images for 300 seconds at 30 second intervals. The working directory has been set as 'C:\ThisLab\WorkingDir' and the serial port in use is
 designated as COM6.
 
 Example three:
+
 cam = BosonCam()
+
 cam.interval_capture(7300,60,serPort='COM6')
 
 This will throw a value error. The maximum allowed value for total time run in 7200 seconds and this exceeds that.
 
 Example four:
+
 cam = BosonCam()
+
 cam.interval_capture(60,2,serPort='COM6')
 
 This will throw a value error. The minimum interval capture allowed is 5 second intervals and this does not meet the threshold.

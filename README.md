@@ -22,12 +22,13 @@ Uses Flirpy to take a picture .
 Uses Flirpy to get focal plane temperature of the camera.
 
 3) interval_capture(self, totalTime, intervalTime, workDir, serPort)
+
 Captures images at a given interval.
 - totalTime (int) total time for taking images. Max value 7200 seconds, min value 60 seconds. Default of 120 seconds.
 - intervalTime (int) time interval for taking images (Ex: images to be taken every 30 seconds). Max value 600 seconds, min value 5 seconds. Default of 30 seconds.
 - workDir (str) directory for images and files to be saved. Defaults to current working directory.
 - serPort (str) serial port the calibrator is plugged into. Has no default.
-=> Errors are thrown if min/max conditions are violated or the working directory does not exist.
+- Errors are thrown if min/max conditions are violated or the working directory does not exist.
 
 interval_capture does the following:
 - Creates a folder within the working directory with the date and time of when the function first starts. All images and files are saved to this folder.
@@ -35,7 +36,7 @@ interval_capture does the following:
 - Logs the focal plane temperature during every loop and then outputs the temperature versus t_value as a text file
 - Logs the serial monitor during every loop, pulling the temperatures of the calibrator, and outputs all of the values as a CSV. The corresponding t value is
 also included so images can be correlated to the data.
-	=> Note: This format can be easily toggled as pandas is very flexible for outputs.
+- Note: This format can be easily toggled as pandas is very flexible for outputs.
 - Plays a chime at the end of the function to alert that it is finished (current tone is the Super Metroid Item Get sound)
 - Prints the following information to console: Number of images captured, path to the new folder created, and total time elapsed.
 
@@ -44,35 +45,43 @@ The function intended for main use is interval_capture. The other two functions 
 
 Example one: Default
 
+```
 cam = BosonCam()
 
 cam.interval_capture(serPort = "COM6")
+```
 
 This captures images for 120 seconds at 30 second intervals. These values are the default settings. The working directory is whatever the current directory is.
 The serial port must always be specified, as there is no default value.
 
 Example two:
+```
 
 cam = BosonCam()
 
 cam.interval_capture(300,30,'C:\ThisLab\WorkingDir',serPort='COM6')
+```
 
 This captures images for 300 seconds at 30 second intervals. The working directory has been set as 'C:\ThisLab\WorkingDir' and the serial port in use is
 designated as COM6.
 
 Example three:
+```
 
 cam = BosonCam()
 
 cam.interval_capture(7300,60,serPort='COM6')
+```
 
 This will throw a value error. The maximum allowed value for total time run in 7200 seconds and this exceeds that.
 
 Example four:
+```
 
 cam = BosonCam()
 
 cam.interval_capture(60,2,serPort='COM6')
+```
 
 This will throw a value error. The minimum interval capture allowed is 5 second intervals and this does not meet the threshold.
 

@@ -1,17 +1,17 @@
-How to use the BosonCam Python Class
-BosonCam V1
+# How to use the BosonCam Python Class
+## BosonCam V1
 
-Introduction:
+## Introduction:
 BosonCam is a Python class created for controlling a FLIR Boson 640 and a thermal calibrator build by Paul Fucile at WHOI. The purpose of the calibrator
 is to get thermal resolution for the infrared camera that will be aboard the CubeSat, BeaverCube2, by STAR lab at MIT. The class controls the camera and
 reads data from the serial port on the calibrator. 
 
-Requirements:
+## Requirements:
 Python 3.x and the following packages
 Flirpy, time, os, matplotlib, numpy, serial, pandas, and playsound
 Currently untested for macOS and Linux
 
-Functions:
+## Functions:
 1) __init__(self)
 Allows the class to be called.
 
@@ -40,7 +40,7 @@ also included so images can be correlated to the data.
 - Plays a chime at the end of the function to alert that it is finished (current tone is the Super Metroid Item Get sound)
 - Prints the following information to console: Number of images captured, path to the new folder created, and total time elapsed.
 
-Tutorial:
+## Tutorial:
 The function intended for main use is interval_capture. The other two functions can be called but are primarily created for use within interval_capture.
 
 Example one: Default

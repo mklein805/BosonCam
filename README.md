@@ -85,7 +85,8 @@ cam.interval_capture(60,2,serPort='COM6')
 
 This will throw a value error. The minimum interval capture allowed is 5 second intervals and this does not meet the threshold.
 
-Setup:
+## Setup:
+
 Download BosonCam.py and success.MP3 to the same place (eg: C:\ThisLab\CameraCal\Code). BosonCam can be run in a python terminal with the commands then typed
 into the terminal or it can be imported to another python program for use there.
 

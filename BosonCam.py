@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 '''
 BosonCam 
-Version 2
-2/22/2022
+Version 3
+8/22/2022
 Created by Marissa Klein, Wellesley College 2022
 Intended use is controlling a FLIR Boson 640 and a thermal calibrator to test the infrared camera for BeaverCube2
 '''
@@ -230,3 +230,73 @@ class BosonCam:
         print("Image capture complete." , str(imageNum) + " Photos saved to " + path , "Total Time Elapsed: " + str(runTime) + " Seconds" , sep= "\n")
         final_playback = "Image capture complete." , str(imageNum) + " Photos saved to " + path , "Total Time Elapsed: " + str(runTime) + " Seconds" 
         return final_playback
+    
+    
+    def serialRead(self,serPort):
+        '''
+
+        Parameters
+        ----------
+        serPort : String
+            Designated serial port of the device.
+
+        Returns
+        -------
+        Dataframe
+            DESCRIPTION.
+            
+        Raises RuntimeError if the serial line is blank.
+
+        '''
+        self.serPort = serPort
+        
+        elapsed_time =[]
+        target_tempr = []
+        it_num = []
+        central_tempr = []
+        back_tempr = []
+        ring_tempr = []
+        
+        #Capture the Serial port, baud rate 19200, times out after two minutes
+        ser = s.Serial(serPort,19200,timeout=120)
+        buffer = ser.readline() #Clears the line in progess
+        real_line = ser.readline()
+        ser.close()
+        
+        if(real_line == ''):
+            raise RuntimeError
+            #Serial Line error
+            
+        
+        real_line = real_line.decode("utf-8")
+        
+        #Values
+        el_t = real_line[0:8] #Time Elapsed
+        elapsed_time.append(el_t)
+        
+        tar_t = real_line[24:28] #Target Temp
+        target_tempr.append(tar_t)
+        
+        itn = real_line[34:38] #Iteration Number
+        it_num.append(itn)
+        
+        cen_t = real_line[39:45] #Central Target Temp
+        central_tempr.append(cen_t)
+        
+        b_t = real_line[62:68] #Back Heatsink Temp
+        back_tempr.append(b_t)
+        
+        ring_t = real_line[75:81] #Ring Temp
+        ring_tempr.append(ring_t)
+        
+        data = {"Elapsed Time" : elapsed_time,
+                "Set Target Temperature" : target_tempr,
+                "Number of iterations" : it_num,
+                "Central Target Temperature" : central_tempr,
+                "Back Heatsink Temperature" : back_tempr,
+                "Ring Temperature" : ring_tempr}
+        
+        df = pd.DataFrame(data)
+        return df
+        
+            
